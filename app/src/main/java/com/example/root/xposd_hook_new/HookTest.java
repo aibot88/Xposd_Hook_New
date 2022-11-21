@@ -49,7 +49,7 @@ public class HookTest implements IXposedHookLoadPackage {
 
     public static void autoLauch(final String LaunchReceiveUI, ClassLoader cl){
         // hook红包界面初始化“开”按钮的方法，在该方法完成后自动点击开按钮领取红包
-        XposedHelpers.findAndHookMethod(LaunchReceiveUI, cl, "onResume", new XC_MethodHook() {
+        XposedHelpers.findAndHookMethod(LaunchReceiveUI, cl, "onSceneEnd", new XC_MethodHook() {
                     @Override
                     protected void afterHookedMethod(MethodHookParam param) throws Throwable {
                         XposedBridge.log("执行了 LaunchReceiveUI 函数");
