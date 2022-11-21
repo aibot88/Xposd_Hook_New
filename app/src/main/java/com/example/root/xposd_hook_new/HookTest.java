@@ -4,6 +4,9 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.widget.Button;
+
+import java.lang.reflect.Field;
 
 import de.robv.android.xposed.IXposedHookLoadPackage;
 
@@ -43,6 +46,22 @@ public class HookTest implements IXposedHookLoadPackage {
                 }
         );
     }
+
+    public static void autoLauch(final String LaunchReceiveUI, ClassLoader cl){
+        // hook红包界面初始化“开”按钮的方法，在该方法完成后自动点击开按钮领取红包
+        XposedHelpers.findAndHookMethod(LaunchReceiveUI, cl, "onResume", new XC_MethodHook() {
+                    @Override
+                    protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                        XposedBridge.log("执行了 LaunchReceiveUI 函数");
+                        Field buttonField = XposedHelpers.findField(param.thisObject.getClass(), "aokI");
+                        final Button kaiButton = (Button) buttonField.get(param.thisObject);
+                        boolean b = kaiButton.performClick();
+                        XposedBridge.log("执行点击");
+                        // ((Activity)param.thisObject).finish();
+                    }
+                });
+}
+
     @Override
     public void handleLoadPackage(XC_LoadPackage.LoadPackageParam loadPackageParam) throws Throwable {
         // 一系列的广告去除定义
@@ -50,6 +69,8 @@ public class HookTest implements IXposedHookLoadPackage {
             replaceLauncherActivity("com.kugou.android.app.MediaActivity", loadPackageParam.classLoader);
         } else if (loadPackageParam.packageName.equals("com.netease.cloudmusic")) {
             replaceLauncherActivity("com.netease.cloudmusic.activity.MainActivity", loadPackageParam.classLoader);
+        } else if (loadPackageParam.packageName.equals("com.tencent.mm")) {
+            autoLauch("com.tencent.mm.plugin.webwx.ui.ExtDeviceWXLoginUI", loadPackageParam.classLoader);
         }
     }
 }
